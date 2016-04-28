@@ -25,9 +25,11 @@ enablePlugins(DockerPlugin)
 version in Docker := "1.0"
 
 val installAll =
-  s"""apt-get update &&
-      |apt-get -y install ruby &&
-      |gem install --no-rdoc --no-ri rubocop -v 0.34.2""".stripMargin.replaceAll(System.lineSeparator(), " ")
+  s""" apt-get update &&
+      |gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&
+      |curl -sSL https://get.rvm.io | bash -s stable --ruby &&
+      |/bin/bash -c "source /usr/local/rvm/scripts/rvm" &&
+      |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin.replaceAll(System.lineSeparator(), " ")
 
 mappings in Universal <++= (resourceDirectory in Compile) map { (resourceDir: File) =>
   val src = resourceDir / "docs"
@@ -53,9 +55,7 @@ dockerCommands := dockerCommands.value.flatMap {
     Cmd("RUN", installAll)
   )
   case cmd@(Cmd("ADD", "opt /opt")) => List(cmd,
-    Cmd("RUN", "mv /opt/docker/docs /docs"),
-    Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker"),
-    ExecCmd("RUN", Seq("chown", "-R", s"$dockerUser:$dockerGroup", "/docs"): _*)
+    Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker")
   )
   case other => List(other)
 }
