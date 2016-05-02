@@ -26,9 +26,9 @@ version in Docker := "1.0"
 
 val installAll =
   s""" apt-get update &&
-      |gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 &&
-      |curl -sSL https://get.rvm.io | bash -s stable --ruby &&
-      |/bin/bash -c "source /usr/local/rvm/scripts/rvm" &&
+      |apt-add-repository -y ppa:brightbox/ruby-ng &&
+      |apt-get -y update &&
+      |apt-get -y install ruby2.3.1 ruby2.3.1-dev &&
       |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin.replaceAll(System.lineSeparator(), " ")
 
 mappings in Universal <++= (resourceDirectory in Compile) map { (resourceDir: File) =>
