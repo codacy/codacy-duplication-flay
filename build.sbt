@@ -1,8 +1,8 @@
 import com.typesafe.sbt.packager.docker.{Cmd, ExecCmd}
 
-name := """codacy-engine-rubocop"""
+name := """codacy-duplication-flay"""
 
-version := "1.0-SNAPSHOT"
+version := "1.0.0"
 
 val languageVersion = "2.11.7"
 
@@ -22,22 +22,21 @@ enablePlugins(JavaAppPackaging)
 
 enablePlugins(DockerPlugin)
 
-version in Docker := "1.0"
+version in Docker := "1.0.0"
 
 val installAll =
   s""" apt-get update &&
       |apt-add-repository -y ppa:brightbox/ruby-ng &&
       |apt-get -y update &&
-      |apt-get -y install ruby2.3.1 ruby2.3.1-dev &&
+      |apt-get -y install ruby2.2 ruby2.2-dev &&
       |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin.replaceAll(System.lineSeparator(), " ")
 
 mappings in Universal <++= (resourceDirectory in Compile) map { (resourceDir: File) =>
-  val src = resourceDir / "docs"
-  val dest = "/docs"
+  val src = resourceDir / "flay"
+  val dest = "/flay"
 
   for {
-    path <- (src ***).get
-    if !path.isDirectory
+    path <- (src ***).get if !path.isDirectory
   } yield path -> path.toString.replaceFirst(src.toString, dest)
 }
 

@@ -13,7 +13,8 @@ object Flay extends IDuplicationImpl {
 
   override def apply(rootPath: Path, config: DuplicationConfiguration): Try[List[DuplicationClone]] = {
     val rootDirectory = rootPath.toFile
-    val result = CommandRunner.exec(getCommand(rootDirectory, config), Some(rootDirectory))
+    val flayBinDirectory = new File("/opt/docker/flay")
+    val result = CommandRunner.exec(getCommand(rootDirectory, config), Some(flayBinDirectory))
 
     result.right.map { output =>
       parseOutput(rootDirectory, output.stdout, config)
@@ -24,7 +25,7 @@ object Flay extends IDuplicationImpl {
   }
 
   private def getCommand(rootDirectory: File, config: DuplicationConfiguration): List[String] = {
-    List("flay", s"-m ${minTokenMatch(config)}", "-d", "-f", rootDirectory.getCanonicalPath)
+    List("rake", "codacy", "2>", "/dev/null")
   }
 
   private def minTokenMatch(config: DuplicationConfiguration) = {
