@@ -1,6 +1,7 @@
 package codacy.duplication.flay
 
-import play.api.libs.json.Json
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, _}
 
 case class FileReport(filename: String, line: Int, contents: Seq[String])
 
@@ -17,5 +18,8 @@ object Clone {
 case class FlayReport(total: Int, clones: Seq[Clone])
 
 object FlayReport {
-  implicit val fmt = Json.format[FlayReport]
+  implicit val reportFmt: Reads[FlayReport] = (
+    (JsPath \ "total").read[Int] and
+      (JsPath \ "clones").readNullable[Seq[Clone]].map(_.getOrElse(Seq.empty))
+    ) (FlayReport.apply _)
 }
