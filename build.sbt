@@ -24,13 +24,6 @@ enablePlugins(DockerPlugin)
 
 version in Docker := "1.0.0"
 
-val installAll =
-  s""" apt-get update &&
-      |apt-add-repository -y ppa:brightbox/ruby-ng &&
-      |apt-get -y update &&
-      |apt-get -y install ruby2.2 ruby2.2-dev &&
-      |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin.replaceAll(System.lineSeparator(), " ")
-
 mappings in Universal <++= (resourceDirectory in Compile) map { (resourceDir: File) =>
   val src = resourceDir / "flay"
   val dest = "/flay"
@@ -47,14 +40,24 @@ daemonUser in Docker := dockerUser
 
 daemonGroup in Docker := dockerGroup
 
-dockerBaseImage := "rtfpessoa/ubuntu-jdk8"
+dockerBaseImage := "develar/java"
+
+val installAll =
+  s"""apk --no-cache add bash build-base ruby ruby-dev &&
+     |apk add --update ca-certificates &&
+     |gem install --no-ri --no-rdoc rake hoe sexp_processor ruby_parser ruby2ruby erubis &&
+     |gem cleanup &&
+     |apk del build-base ruby-dev &&
+     |rm -rf /tmp/* &&
+     |rm -rf /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " ")
 
 dockerCommands := dockerCommands.value.flatMap {
   case cmd@Cmd("WORKDIR", _) => List(cmd,
     Cmd("RUN", installAll)
   )
+
   case cmd@(Cmd("ADD", "opt /opt")) => List(cmd,
-    Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker")
+    Cmd("RUN", s"adduser -u 2004 -D $dockerUser")
   )
   case other => List(other)
 }
