@@ -1,13 +1,13 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/85242dbf532742889a0b856ee11d022a)](https://www.codacy.com/app/Codacy/codacy-duplication-flay?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=codacy/codacy-duplication-flay&amp;utm_campaign=Badge_Grade)
-[![Build Status](https://circleci.com/gh/codacy/codacy-duplication-flay.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/codacy/codacy-duplication-flay)
-
-# Codacy Duplication Flay 
+# Codacy Duplication Flay
 
 This is the duplication docker we use at Codacy to have [Flay](https://github.com/seattlerb/flay) support.
 You can also create a docker to integrate the tool and language of your choice!
 Check the **Docs** section for more information.
 
-## Usage               
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/85242dbf532742889a0b856ee11d022a)](https://www.codacy.com/app/Codacy/codacy-duplication-flay?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=codacy/codacy-duplication-flay&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://circleci.com/gh/codacy/codacy-duplication-flay.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/codacy/codacy-duplication-flay)
+
+## Usage
 
 > TODO
 
@@ -19,11 +19,11 @@ Check the **Docs** section for more information.
 
 > TODO
 
-## What is Codacy?
+## What is Codacy
 
 [Codacy](https://www.codacy.com/) is an Automated Code Review Tool that monitors your technical debt, helps you improve your code quality, teaches best practices to your developers, and helps you save time in Code Reviews.
 
-### Among Codacy’s features:
+### Among Codacy’s features
 
 - Identify new Static Analysis issues
 - Commit and Pull Request Analysis with GitHub, BitBucket/Stash, GitLab (and also direct git repositories)
