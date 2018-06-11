@@ -2,8 +2,7 @@ package codacy.duplication.flay
 
 import java.io.File
 
-import codacy.docker.api.duplication.{DuplicationClone, DuplicationTool}
-import codacy.docker.api.duplication._
+import codacy.docker.api.duplication.{DuplicationClone, DuplicationTool, _}
 import codacy.docker.api.utils.CommandRunner
 import codacy.docker.api.{DuplicationConfiguration, Source}
 import com.codacy.api.dtos.Language
