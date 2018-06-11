@@ -28,8 +28,8 @@ object Common {
             s""" apt-get update &&
                |apt-add-repository -y ppa:brightbox/ruby-ng &&
                |apt-get -y update &&
-               |apt-get -y install ruby2.2 ruby2.2-dev &&
-               |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin
+               |apt-get -y install ruby ruby-dev &&
+               |bundle install""".stripMargin
               .replaceAll(System.lineSeparator(), " ")))
 
       case cmd @ (Cmd("ADD", _)) =>

@@ -100,10 +100,9 @@ jobs:
           name: Install the tool
           command: |
             apt-get update
-            sudo apt-add-repository -y ppa:brightbox/ruby-ng
             sudo apt-get -y update
-            sudo apt-get -y install ruby2.2 ruby2.2-dev
-            gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis
+            sudo apt-get -y install ruby ruby-dev
+            bundle install
       - run:
           name: Test
           command: ./scripts/test.sh

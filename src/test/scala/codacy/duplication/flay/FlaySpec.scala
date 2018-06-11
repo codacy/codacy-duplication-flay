@@ -4,6 +4,8 @@ import codacy.docker.api.Source
 import codacy.docker.api.duplication.{DuplicationClone, DuplicationCloneFile}
 import org.specs2.mutable.Specification
 
+import scala.util.Success
+
 class FlaySpec extends Specification {
 
   val resourceDirectory =
@@ -52,13 +54,13 @@ class FlaySpec extends Specification {
           List(DuplicationCloneFile("flay_erb.rb", 28, 34), DuplicationCloneFile("flay_erb.rb", 36, 42))))
         .sortBy(_.cloneLines)
 
-      val clonesOpt = Flay(Source.Directory(dir), None, Map.empty)
+      val clonesTry = Flay(Source.Directory(dir), None, Map.empty)
 
-      val clones = clonesOpt.get
-
-      clones.length should beEqualTo(expectedClones.length)
-
-      clones.sortBy(_.cloneLines) should beEqualTo(expectedClones)
+      clonesTry should beLike {
+        case Success(clones) =>
+          clones.length should beEqualTo(expectedClones.length)
+          clones.sortBy(_.cloneLines) should beEqualTo(expectedClones)
+      }
     }
   }
 
