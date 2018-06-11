@@ -26,8 +26,7 @@ lazy val codacyDuplicationFlay = project
         scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings"))),
     name := nameStr,
     // App Dependencies
-    libraryDependencies ++= Seq(
-      Dependencies.Codacy.duplicationSeed),
+    libraryDependencies ++= Seq(Dependencies.Codacy.duplicationSeed),
     // Test Dependencies
     libraryDependencies ++= Seq(Dependencies.specs2).map(_ % Test))
   .settings(Common.dockerSettings: _*)

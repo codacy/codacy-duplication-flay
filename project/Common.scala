@@ -29,12 +29,11 @@ object Common {
                |apt-add-repository -y ppa:brightbox/ruby-ng &&
                |apt-get -y update &&
                |apt-get -y install ruby2.2 ruby2.2-dev &&
-               |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin.replaceAll(System.lineSeparator(), " ")))
+               |gem install rake hoe sexp_processor ruby_parser ruby2ruby erubis""".stripMargin
+              .replaceAll(System.lineSeparator(), " ")))
 
-      case cmd@(Cmd("ADD", _)) => List(
-        Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker"),
-        cmd
-      )
+      case cmd @ (Cmd("ADD", _)) =>
+        List(Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker"), cmd)
 
       case other => List(other)
     })

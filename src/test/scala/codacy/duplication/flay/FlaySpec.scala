@@ -6,14 +6,16 @@ import org.specs2.mutable.Specification
 
 class FlaySpec extends Specification {
 
-  val resourceDirectory = new java.io.File(getClass.getClassLoader.getResource(".").toURI)
+  val resourceDirectory =
+    new java.io.File(getClass.getClassLoader.getResource(".").toURI)
 
   "Flay" should {
     "get clones" in {
       val dir = resourceDirectory + "/analysis/duplication/ruby"
 
       val expectedClones = List(
-        DuplicationClone("""msg = "sexp_to_#{File.extname(node.file).sub(/./, "")}"
+        DuplicationClone(
+          """msg = "sexp_to_#{File.extname(node.file).sub(/./, "")}"
                            |self.respond_to?(msg) ? (self.send(msg, node)) : (sexp_to_rb(node))
                            |msg = "sexp_to_#{File.extname(s.file).sub(/./, "")}"
                            |self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))""".stripMargin,
@@ -30,7 +32,8 @@ class FlaySpec extends Specification {
           10,
           3,
           List(DuplicationCloneFile("flay.rb", 76, 78), DuplicationCloneFile("flay.rb", 101, 103))),
-        DuplicationClone("""def add_expr_literal(src, code)
+        DuplicationClone(
+          """def add_expr_literal(src, code)
                            |  if code.=~(BLOCK_EXPR) then
                            |    ((src << "@output_buffer.append= ") << code)
                            |  else
@@ -55,7 +58,7 @@ class FlaySpec extends Specification {
 
       clones.length should beEqualTo(expectedClones.length)
 
-      clones.sortBy(_.cloneLines) shouldEqual expectedClones
+      clones.sortBy(_.cloneLines) should beEqualTo(expectedClones)
     }
   }
 

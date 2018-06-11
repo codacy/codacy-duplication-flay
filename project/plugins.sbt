@@ -1,8 +1,7 @@
 // Resolvers
 resolvers ++= Seq(
   "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
-  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases"
-)
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases")
 
 // Static Analysis
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.0.7")
