@@ -1,5 +1,5 @@
 package codacy.duplication.flay
 
-import codacy.dockerApi.DockerDuplication
+import codacy.docker.api.duplication.DockerDuplication
 
-object Duplication extends DockerDuplication(Flay)
+object Duplication extends DockerDuplication(Flay)()

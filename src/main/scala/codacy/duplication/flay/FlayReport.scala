@@ -15,11 +15,11 @@ object Clone {
   implicit val fmt = Json.format[Clone]
 }
 
-case class FlayReport(total: Int, clones: Seq[Clone])
+case class FlayReport(total: Int, clones: List[Clone])
 
 object FlayReport {
   implicit val reportFmt: Reads[FlayReport] = (
     (JsPath \ "total").read[Int] and
-      (JsPath \ "clones").readNullable[Seq[Clone]].map(_.getOrElse(Seq.empty))
+      (JsPath \ "clones").readNullable[List[Clone]].map(_.getOrElse(List.empty))
     ) (FlayReport.apply _)
 }
