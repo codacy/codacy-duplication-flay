@@ -99,10 +99,10 @@ jobs:
       - run:
           name: Install the tool
           command: |
-            apt-get update
             sudo apt-get -y update
             sudo apt-get -y install ruby ruby-dev
-            bundle install
+            sudo gem install bundle
+            sudo bundle install
       - run:
           name: Test
           command: ./scripts/test.sh

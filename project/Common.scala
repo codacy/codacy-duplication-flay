@@ -20,19 +20,18 @@ object Common {
     dockerEntrypoint := Seq(s"$defaultDockerInstallationPath/bin/${name.value}"),
     dockerCmd := Seq(),
     dockerCommands := dockerCommands.value.flatMap {
-      case cmd @ Cmd("WORKDIR", _) =>
+      case cmd @ Cmd("ADD", "opt /opt") =>
         List(
-          cmd,
           Cmd(
             "RUN",
-            s""" apt-get update &&
-               |apt-add-repository -y ppa:brightbox/ruby-ng &&
+            s"""apt-get update &&
                |apt-get -y update &&
                |apt-get -y install ruby ruby-dev &&
-               |bundle install""".stripMargin
-              .replaceAll(System.lineSeparator(), " ")))
+               |gem install bundle &&
+               |bundle install""".stripMargin.replaceAll(System.lineSeparator(), " ")),
+          cmd)
 
-      case cmd @ (Cmd("ADD", _)) =>
+      case cmd @ (Cmd("WORKDIR", _)) =>
         List(Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker"), cmd)
 
       case other => List(other)
