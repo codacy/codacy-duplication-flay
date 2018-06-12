@@ -1,15 +1,8 @@
-val nameStr = """codacy-duplication-flay"""
-
-val versionStr = "1.0.0-SNAPSHOT"
+import sbt.Keys._
+import sbt._
 
 val scalaBinaryVersionNumber = "2.12"
 val scalaVersionNumber = s"$scalaBinaryVersionNumber.4"
-
-scalaVersion := scalaVersionNumber
-scalaVersion in ThisBuild := scalaVersionNumber
-scalaBinaryVersion in ThisBuild := scalaBinaryVersionNumber
-
-scapegoatVersion in ThisBuild := "1.3.5"
 
 lazy val codacyDuplicationFlay = project
   .in(file("."))
@@ -20,13 +13,18 @@ lazy val codacyDuplicationFlay = project
       List(
         organization := "com.codacy",
         scalaVersion := scalaVersionNumber,
-        version := versionStr,
+        version := "0.1.0-SNAPSHOT",
         scalacOptions ++= Common.compilerFlags,
         scalacOptions in Test ++= Seq("-Yrangepos"),
         scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings"))),
-    name := nameStr,
+    name := "codacy-duplication-flay",
     // App Dependencies
     libraryDependencies ++= Seq(Dependencies.Codacy.duplicationSeed),
     // Test Dependencies
     libraryDependencies ++= Seq(Dependencies.specs2).map(_ % Test))
   .settings(Common.dockerSettings: _*)
+
+scalaVersion in ThisBuild := scalaVersionNumber
+scalaBinaryVersion in ThisBuild := scalaBinaryVersionNumber
+
+scapegoatVersion in ThisBuild := "1.3.5"
