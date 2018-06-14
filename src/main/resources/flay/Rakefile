@@ -57,8 +57,9 @@ task :run do
   ruby "#{Hoe::RUBY_FLAGS} bin/flay #{mass} #{fuzz} #{diff} #{libr} #{file}"
 end
 
-task :codacy do
-  ruby "#{Hoe::RUBY_FLAGS} bin/flay --diff --report /src/*" 
+task :codacy, [:src_directory] do | t, args |
+  args.with_defaults(:src_directory => '/src')
+  ruby "#{Hoe::RUBY_FLAGS} bin/flay --diff --report #{args[:src_directory]}/*"
 end
 
 # vim: syntax=ruby

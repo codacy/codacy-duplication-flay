@@ -1,0 +1,27 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    erubis (2.7.0)
+    hoe (3.17.0)
+      rake (>= 0.8, < 13.0)
+    rake (12.3.1)
+    ruby2ruby (2.4.1)
+      ruby_parser (~> 3.1)
+      sexp_processor (~> 4.6)
+    ruby_parser (3.11.0)
+      sexp_processor (~> 4.9)
+    sexp_processor (4.11.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  erubis
+  hoe
+  rake
+  ruby2ruby
+  ruby_parser
+  sexp_processor
+
+BUNDLED WITH
+   1.16.2
