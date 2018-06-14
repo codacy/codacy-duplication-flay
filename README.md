@@ -5,6 +5,7 @@ You can also create a docker to integrate the tool and language of your choice!
 Check the **Docs** section for more information.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/85242dbf532742889a0b856ee11d022a)](https://www.codacy.com/app/Codacy/codacy-duplication-flay?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=codacy/codacy-duplication-flay&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/85242dbf532742889a0b856ee11d022a)](https://www.codacy.com/app/Codacy/codacy-duplication-flay?utm_source=github.com&utm_medium=referral&utm_content=codacy/codacy-duplication-flay&utm_campaign=Badge_Coverage)
 [![Build Status](https://circleci.com/gh/codacy/codacy-duplication-flay.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/codacy/codacy-duplication-flay)
 
 ## Usage
