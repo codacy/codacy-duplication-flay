@@ -26,7 +26,7 @@ object Common {
             "RUN",
             s"""apt-get update &&
                |apt-get -y update &&
-               |apt-get -y install ruby ruby-dev &&
+               |apt-get -y install bash ruby ruby-dev &&
                |gem install bundle &&
                |bundle install""".stripMargin.replaceAll(System.lineSeparator(), " ")),
           cmd)
