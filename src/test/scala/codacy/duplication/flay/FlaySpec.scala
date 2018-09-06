@@ -1,7 +1,7 @@
 package codacy.duplication.flay
 
-import codacy.docker.api.Source
-import codacy.docker.api.duplication.{DuplicationClone, DuplicationCloneFile}
+import com.codacy.plugins.api.Source
+import com.codacy.plugins.api.duplication.{DuplicationClone, DuplicationCloneFile}
 import org.specs2.mutable.Specification
 
 import scala.util.Success

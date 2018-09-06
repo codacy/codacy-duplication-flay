@@ -14,6 +14,7 @@ lazy val codacyDuplicationFlay = project
         organization := "com.codacy",
         scalaVersion := scalaVersionNumber,
         version := "0.1.0-SNAPSHOT",
+        resolvers := Seq("Sonatype OSS Snapshots".at("https://oss.sonatype.org/content/repositories/releases")) ++ resolvers.value,
         scalacOptions ++= Common.compilerFlags,
         scalacOptions in Test ++= Seq("-Yrangepos"),
         scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings"))),

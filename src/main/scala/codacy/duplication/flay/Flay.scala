@@ -2,10 +2,10 @@ package codacy.duplication.flay
 
 import java.io.File
 
-import codacy.docker.api.duplication.{DuplicationClone, DuplicationTool, _}
-import codacy.docker.api.utils.CommandRunner
-import codacy.docker.api.{DuplicationConfiguration, Source}
-import com.codacy.api.dtos.Language
+import com.codacy.duplication.scala.seed.utils.CommandRunner
+import com.codacy.plugins.api.duplication.{DuplicationClone, DuplicationCloneFile, DuplicationTool}
+import com.codacy.plugins.api.languages.Language
+import com.codacy.plugins.api.{Options, Source}
 import play.api.libs.json.{JsValue, Json}
 
 import scala.util.{Failure, Properties, Success, Try}
@@ -14,10 +14,9 @@ object Flay extends DuplicationTool {
 
   private val defaultMinTokenMatch = 10
 
-  override def apply(
-    path: Source.Directory,
-    language: Option[Language],
-    options: Map[DuplicationConfiguration.Key, DuplicationConfiguration.Value]): Try[List[DuplicationClone]] = {
+  override def apply(path: Source.Directory,
+                     language: Option[Language],
+                     options: Map[Options.Key, Options.Value]): Try[List[DuplicationClone]] = {
 
     val flayBinDirectory = new File("src/main/resources/flay")
     val result = CommandRunner.exec(command(path), Some(flayBinDirectory))
@@ -35,16 +34,16 @@ object Flay extends DuplicationTool {
     List("rake", s"codacy[${srcDir.path}]", "2>", "/dev/null")
   }
 
-  private def minTokenMatch(options: Map[DuplicationConfiguration.Key, DuplicationConfiguration.Value]) = {
+  private def minTokenMatch(options: Map[Options.Key, Options.Value]): Int = {
     options
-      .get(DuplicationConfiguration.Key("minTokenMatch"))
+      .get(Options.Key("minTokenMatch"))
       .map(value => value: JsValue)
       .flatMap(_.asOpt[Int])
       .getOrElse(defaultMinTokenMatch)
   }
 
   private def parseOutput(output: Seq[String],
-                          options: Map[DuplicationConfiguration.Key, DuplicationConfiguration.Value],
+                          options: Map[Options.Key, Options.Value],
                           sourcePrefix: String): Either[Throwable, List[DuplicationClone]] = {
 
     val jsonStringEither = output match {
@@ -72,7 +71,7 @@ object Flay extends DuplicationTool {
   }
 
   private def reportToDuplication(report: FlayReport,
-                                  options: Map[DuplicationConfiguration.Key, DuplicationConfiguration.Value],
+                                  options: Map[Options.Key, Options.Value],
                                   sourcePrefix: String): List[DuplicationClone] = {
     report.clones.flatMap { clone =>
       val dupCloneFiles = clone.files.map { fileReport =>
