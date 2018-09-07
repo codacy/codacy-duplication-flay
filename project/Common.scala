@@ -13,26 +13,35 @@ object Common {
     dockerAlias := DockerAlias(None, Some("codacy"), name.value, Some(version.value)),
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "rtfpessoa/ubuntu-jdk8",
+    dockerBaseImage := "library/openjdk:8-jre-alpine",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
     dockerEntrypoint := Seq(s"$defaultDockerInstallationPath/bin/${name.value}"),
     dockerCmd := Seq(),
     dockerCommands := dockerCommands.value.flatMap {
-      case cmd @ Cmd("ADD", "opt /opt") =>
+      case cmd @ Cmd("ADD", "--chown=docker:docker opt /opt") =>
         List(
+          cmd,
           Cmd(
             "RUN",
-            s"""apt-get update &&
-               |apt-get -y update &&
-               |apt-get -y install bash ruby ruby-dev &&
-               |gem install bundle &&
-               |bundle install""".stripMargin.replaceAll(System.lineSeparator(), " ")),
-          cmd)
+            s"""|echo -n "" > /etc/apk/repositories
+                |&& echo "http://dl-cdn.alpinelinux.org/alpine/v3.7/main" >> /etc/apk/repositories
+                |&& echo "http://dl-cdn.alpinelinux.org/alpine/v3.7/community" >> /etc/apk/repositories
+                |&& apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
+                |ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
+                |&& echo 'gem: --no-document' > /etc/gemrc
+                |&& gem install rake
+                |&& cd $defaultDockerInstallationPath/setup
+                |&& bundle install
+                |&& gem cleanup
+                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " ")))
 
-      case cmd @ (Cmd("WORKDIR", _)) =>
-        List(Cmd("RUN", "adduser --uid 2004 --disabled-password --gecos \"\" docker"), cmd)
+      case cmd @ Cmd("WORKDIR", _) =>
+        List(
+          Cmd("RUN", "adduser -u 2004 -D docker"),
+          Cmd("ENV", s"FLAY_SOURCE_PATH $defaultDockerInstallationPath/flay"),
+          cmd)
 
       case other => List(other)
     })
