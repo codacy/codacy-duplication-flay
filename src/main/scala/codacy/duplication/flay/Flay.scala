@@ -18,7 +18,7 @@ object Flay extends DuplicationTool {
                      language: Option[Language],
                      options: Map[Options.Key, Options.Value]): Try[List[DuplicationClone]] = {
 
-    val flayBinDirectory = new File("src/main/resources/flay")
+    val flayBinDirectory = new File(sys.env.getOrElse("FLAY_SOURCE_PATH", "src/main/resources/flay"))
     val result = CommandRunner.exec(command(path), Some(flayBinDirectory))
 
     (for {
