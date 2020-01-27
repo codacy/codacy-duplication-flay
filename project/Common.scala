@@ -22,6 +22,7 @@ object Common {
       case cmd @ Cmd("ADD", "--chown=docker:docker opt /opt") =>
         List(
           cmd,
+          Cmd("RUN", "mv /opt/codacy/docs /docs"),
           Cmd(
             "RUN",
             s"""|echo -n "" > /etc/apk/repositories
@@ -30,7 +31,7 @@ object Common {
                 |&& apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
                 |ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
                 |&& echo 'gem: --no-document' > /etc/gemrc
-                |&& gem install rake
+                |&& gem install rake -v 12.3.3
                 |&& cd $defaultDockerInstallationPath/setup
                 |&& bundle install
                 |&& gem cleanup

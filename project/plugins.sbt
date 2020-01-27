@@ -1,7 +1,5 @@
 // Resolvers
-resolvers ++= Seq(
-  "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
-  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/releases")
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq("com.github.pathikrit" %% "better-files" % "3.6.0",
   "com.typesafe.play" %% "play-json" % "2.6.9")
@@ -18,5 +16,4 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.3.11")
 
-resolvers += Resolver.jcenterRepo
 addSbtPlugin("com.codacy" % "codacy-sbt-plugin" % "17.1.5")

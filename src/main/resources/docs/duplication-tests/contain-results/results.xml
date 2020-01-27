@@ -1,0 +1,32 @@
+<checkstyle version="4.3">
+    <duplication nrTokens="10" nrLines="2" message="msg = &quot;sexp_to_#{File.extname(node.file).sub(/./, &quot;&quot;)}&quot;&#10;self.respond_to?(msg) ? (self.send(msg, node)) : (sexp_to_rb(node))&#10;msg = &quot;sexp_to_#{File.extname(s.file).sub(/./, &quot;&quot;)}&quot;&#10;self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))">
+        <file name="flay.rb">
+            <property name="startLine" value="548"></property>
+            <property name="endLine" value="549"></property>
+        </file>
+        <file name="flay.rb">
+            <property name="startLine" value="607"></property>
+            <property name="endLine" value="608"></property>
+        </file>
+    </duplication>
+    <duplication nrTokens="10" nrLines="3" message="opts.on(&quot;-m&quot;, &quot;--mass MASS&quot;, Integer, &quot;Sets mass threshold (default = #{options[:mass]})&quot;) do |m|&#10;  options[:mass] = m.to_i&#10;end&#10;opts.on(&quot;-t&quot;, &quot;--timeout TIME&quot;, Integer, &quot;Set the timeout. (default = #{options[:timeout]})&quot;) do |t|&#10;  options[:timeout] = t.to_i&#10;end">
+        <file name="flay.rb">
+            <property name="startLine" value="76"></property>
+            <property name="endLine" value="78"></property>
+        </file>
+        <file name="flay.rb">
+            <property name="startLine" value="101"></property>
+            <property name="endLine" value="103"></property>
+        </file>
+    </duplication>
+    <duplication nrTokens="10" nrLines="7" message="def add_expr_literal(src, code)&#10;  if code.=~(BLOCK_EXPR) then&#10;    ((src &lt;&lt; &quot;@output_buffer.append= &quot;) &lt;&lt; code)&#10;  else&#10;    (((src &lt;&lt; &quot;@output_buffer.append=(&quot;) &lt;&lt; code) &lt;&lt; &quot;);&quot;)&#10;  end&#10;end&#10;def add_expr_escaped(src, code)&#10;  if code.=~(BLOCK_EXPR) then&#10;    ((src &lt;&lt; &quot;@output_buffer.safe_append= &quot;) &lt;&lt; code)&#10;  else&#10;    (((src &lt;&lt; &quot;@output_buffer.safe_append=(&quot;) &lt;&lt; code) &lt;&lt; &quot;);&quot;)&#10;  end&#10;end">
+        <file name="flay_erb.rb">
+            <property name="startLine" value="28"></property>
+            <property name="endLine" value="34"></property>
+        </file>
+        <file name="flay_erb.rb">
+            <property name="startLine" value="36"></property>
+            <property name="endLine" value="42"></property>
+        </file>
+    </duplication>
+</checkstyle>

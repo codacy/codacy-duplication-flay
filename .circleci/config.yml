@@ -83,6 +83,7 @@ workflows:
       - codacy_plugins_test/run:
           name: plugins_test
           run_json_tests: false
+          run_duplication_tests: true
           requires:
             - publish_docker_local
       - codacy/shell:
