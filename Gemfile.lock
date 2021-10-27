@@ -2,18 +2,18 @@ GEM
   remote: https://rubygems.org/
   specs:
     erubis (2.7.0)
-    hoe (3.17.0)
-      rake (>= 0.8, < 13.0)
-    rake (12.3.3)
-    ruby2ruby (2.4.1)
+    hoe (3.23.0)
+      rake (>= 0.8, < 15.0)
+    rake (13.0.6)
+    ruby2ruby (2.4.4)
       ruby_parser (~> 3.1)
       sexp_processor (~> 4.6)
-    ruby_parser (3.11.0)
-      sexp_processor (~> 4.9)
-    sexp_processor (4.11.0)
+    ruby_parser (3.17.0)
+      sexp_processor (~> 4.15, >= 4.15.1)
+    sexp_processor (4.16.0)
 
 PLATFORMS
-  ruby
+  universal-darwin-20
 
 DEPENDENCIES
   erubis
@@ -24,4 +24,4 @@ DEPENDENCIES
   sexp_processor
 
 BUNDLED WITH
-   1.16.2
+   2.2.27
