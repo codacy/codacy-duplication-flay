@@ -55,7 +55,6 @@ workflows:
       - codacy/publish_docker:
           context: CodacyDocker
           requires:
-            - test
             - lint
             - plugins_test
             - publish_docker_local
