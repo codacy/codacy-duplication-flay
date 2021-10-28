@@ -30,7 +30,7 @@ object Common {
                 |&& gem install rake -v 12.3.3
                 |&& gem install rdoc
                 |&& cd $defaultDockerInstallationPath/setup && bundle install && gem cleanup
-                |&& rm -rf /tmp/* /var/cache/apk/*""")
+                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " "))
         )
 
       case cmd @ Cmd("WORKDIR", _) =>
