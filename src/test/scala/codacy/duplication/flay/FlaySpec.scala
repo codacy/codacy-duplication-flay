@@ -23,7 +23,7 @@ class FlaySpec extends Specification {
                            |self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))""".stripMargin,
           10,
           2,
-          List(DuplicationCloneFile("flay.rb", 548, 549), DuplicationCloneFile("flay.rb", 607, 608))),
+          List(DuplicationCloneFile("flay.rb", 549, 550), DuplicationCloneFile("flay.rb", 607, 608))),
         DuplicationClone(
           """opts.on("-m", "--mass MASS", Integer, "Sets mass threshold (default = #{options[:mass]})") do |m|
             |  options[:mass] = m.to_i

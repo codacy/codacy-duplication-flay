@@ -1,8 +1,8 @@
 <checkstyle version="4.3">
     <duplication nrTokens="10" nrLines="2" message="msg = &quot;sexp_to_#{File.extname(node.file).sub(/./, &quot;&quot;)}&quot;&#10;self.respond_to?(msg) ? (self.send(msg, node)) : (sexp_to_rb(node))&#10;msg = &quot;sexp_to_#{File.extname(s.file).sub(/./, &quot;&quot;)}&quot;&#10;self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))">
         <file name="flay.rb">
-            <property name="startLine" value="548"></property>
-            <property name="endLine" value="549"></property>
+            <property name="startLine" value="549"></property>
+            <property name="endLine" value="550"></property>
         </file>
         <file name="flay.rb">
             <property name="startLine" value="607"></property>

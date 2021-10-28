@@ -12,7 +12,7 @@ object Common {
     packageName in Docker := packageName.value,
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "library/openjdk:8-jre-alpine3.8",
+    dockerBaseImage := "library/amazoncorretto:8-alpine3.14-jre",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
@@ -23,19 +23,15 @@ object Common {
         List(
           cmd,
           Cmd("RUN", "mv /opt/codacy/docs /docs"),
-          Cmd(
-            "RUN",
-            s"""|echo -n "" > /etc/apk/repositories
-                |&& echo "http://dl-cdn.alpinelinux.org/alpine/v3.7/main" >> /etc/apk/repositories
-                |&& echo "http://dl-cdn.alpinelinux.org/alpine/v3.7/community" >> /etc/apk/repositories
-                |&& apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
-                |ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
+          Cmd("RUN",
+            s"""|apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
+                |   ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
                 |&& echo 'gem: --no-document' > /etc/gemrc
                 |&& gem install rake -v 12.3.3
-                |&& cd $defaultDockerInstallationPath/setup
-                |&& bundle install
-                |&& gem cleanup
-                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " ")))
+                |&& gem install rdoc
+                |&& cd $defaultDockerInstallationPath/setup && bundle install && gem cleanup
+                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " "))
+        )
 
       case cmd @ Cmd("WORKDIR", _) =>
         List(

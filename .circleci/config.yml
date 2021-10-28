@@ -2,39 +2,8 @@
 version: 2.1
 
 orbs:
-  codacy: codacy/base@2.2.1
+  codacy: codacy/base@6.1.1
   codacy_plugins_test: codacy/plugins-test@0.15.4
-
-jobs:
-  test:
-    machine: true
-    working_directory: ~/workdir
-    steps:
-      - attach_workspace:
-          at: ~/workdir
-      - run:
-          name: Install the tool
-          command: |
-            sudo apt-get -y update
-            sudo apt-get -y install ruby-full
-            sudo gem install bundler -v 1.17.3
-            bundle install
-      - run:
-          name: Test
-          command: scripts/test.sh
-      - run:
-          name: Store test reports
-          command: |
-            mkdir -p coverage-reports/scoverage
-            cp -f target/scala-2.12/coverage-report/cobertura.xml coverage-reports/scoverage/results.xml
-      - store_test_results:
-          path: coverage-reports
-      - store_artifacts:
-          path: target/scala-2.12/coverage-report
-      - store_artifacts:
-          path: target/scala-2.12/scoverage-report
-      - store_artifacts:
-          path: target/scala-2.12/scoverage-data
 
 workflows:
   version: 2
@@ -56,9 +25,6 @@ workflows:
           requires:
             - codacy/checkout_and_version
             - sbt_dependencies
-      - test:
-          requires:
-            - compile
       - codacy/sbt:
           name: lint
           cmd: |
@@ -89,7 +55,6 @@ workflows:
       - codacy/publish_docker:
           context: CodacyDocker
           requires:
-            - test
             - lint
             - plugins_test
             - publish_docker_local
