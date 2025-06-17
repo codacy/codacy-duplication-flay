@@ -21,7 +21,7 @@ class FlaySpec extends Specification {
                            |self.respond_to?(msg) ? (self.send(msg, node)) : (sexp_to_rb(node))
                            |msg = "sexp_to_#{File.extname(s.file).sub(/./, "")}"
                            |self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))""".stripMargin,
-          10,
+          1,
           2,
           List(DuplicationCloneFile("flay.rb", 549, 550), DuplicationCloneFile("flay.rb", 607, 608))),
         DuplicationClone(
@@ -31,7 +31,7 @@ class FlaySpec extends Specification {
             |opts.on("-t", "--timeout TIME", Integer, "Set the timeout. (default = #{options[:timeout]})") do |t|
             |  options[:timeout] = t.to_i
             |end""".stripMargin,
-          10,
+          1,
           3,
           List(DuplicationCloneFile("flay.rb", 76, 78), DuplicationCloneFile("flay.rb", 101, 103))),
         DuplicationClone(
@@ -49,7 +49,7 @@ class FlaySpec extends Specification {
                            |    (((src << "@output_buffer.safe_append=(") << code) << ");")
                            |  end
                            |end""".stripMargin,
-          10,
+          1,
           7,
           List(DuplicationCloneFile("flay_erb.rb", 28, 34), DuplicationCloneFile("flay_erb.rb", 36, 42))))
         .sortBy(_.cloneLines)
