@@ -20,7 +20,12 @@ object Flay extends DuplicationTool {
 
     val flayBinDirectory = new File(sys.env.getOrElse("FLAY_SOURCE_PATH", "src/main/resources/flay"))
     val result = CommandRunner.exec(command(path), Some(flayBinDirectory))
-
+    result.foreach { output =>
+      println("=== FLAY STDOUT ===")
+      println(output.stdout)
+      println("=== FLAY STDERR ===")
+      println(output.stderr)
+    }
     (for {
       output <- result
       reports <- parseOutput(output.stdout, options, s"${path.path}/")
