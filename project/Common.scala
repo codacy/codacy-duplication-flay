@@ -23,15 +23,15 @@ object Common {
         List(
           cmd,
           Cmd("RUN", "mv /opt/codacy/docs /docs"),
-          Cmd("RUN",
+          Cmd(
+            "RUN",
             s"""|apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
                 |   ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
                 |&& echo 'gem: --no-document' > /etc/gemrc
                 |&& gem install rake -v 13.3.0
                 |&& gem install rdoc
                 |&& cd $defaultDockerInstallationPath/setup && bundle install && gem cleanup
-                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " "))
-        )
+                |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " ")))
 
       case cmd @ Cmd("WORKDIR", _) =>
         List(

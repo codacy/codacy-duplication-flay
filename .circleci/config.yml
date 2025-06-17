@@ -27,12 +27,7 @@ workflows:
       - codacy/sbt:
           name: lint
           cmd: |
-            sbt "set scalafmtUseIvy in ThisBuild := false;
-                 scalafmt::test;
-                 test:scalafmt::test;
-                 sbt:scalafmt::test;
-                 scapegoat;
-                 scalafixCli --test"
+            sbt ";scalafmtCheck; scalafmtSbtCheck; scapegoat"
           requires:
             - compile
       - codacy/sbt:
