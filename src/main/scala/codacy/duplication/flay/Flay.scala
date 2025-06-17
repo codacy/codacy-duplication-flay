@@ -12,7 +12,7 @@ import scala.util.{Failure, Properties, Success, Try}
 
 object Flay extends DuplicationTool {
 
-  private val defaultMinTokenMatch = 10
+  private val defaultMinTokenMatch = 1
 
   override def apply(path: Source.Directory,
                      language: Option[Language],
