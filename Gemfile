@@ -10,3 +10,4 @@ gem "sexp_processor"
 gem "ruby_parser"
 gem "ruby2ruby"
 gem "erubis"
+gem 'minitest'
