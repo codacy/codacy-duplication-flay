@@ -12,7 +12,7 @@ import scala.util.{Failure, Properties, Success, Try}
 
 object Flay extends DuplicationTool {
 
-  private val defaultMinTokenMatch = 10
+  private val defaultMinTokenMatch = 1
 
   override def apply(path: Source.Directory,
                      language: Option[Language],
@@ -31,7 +31,7 @@ object Flay extends DuplicationTool {
   }
 
   private def command(srcDir: Source.Directory): List[String] = {
-    List("rake", s"codacy[${srcDir.path}]", "2>", "/dev/null")
+    List("sh", "-c", s"rake codacy[${srcDir.path}] 2>/dev/null")
   }
 
   private def minTokenMatch(options: Map[Options.Key, Options.Value]): Int = {

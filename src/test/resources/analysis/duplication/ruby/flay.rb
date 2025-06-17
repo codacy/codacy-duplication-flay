@@ -159,7 +159,7 @@ class Flay
   def self.filter_files files, ignore = DEFAULT_IGNORE
     ignore_paths = if ignore.respond_to? :read then
                      ignore.read
-                   elsif File.exists? ignore then
+                   elsif File.exist? ignore then
                      File.read ignore
                    end
 

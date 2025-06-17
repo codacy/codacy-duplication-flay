@@ -1,8 +1,7 @@
 import sbt.Keys._
 import sbt._
 
-val scalaBinaryVersionNumber = "2.12"
-val scalaVersionNumber = s"$scalaBinaryVersionNumber.4"
+val scalaVersionNumber = "2.12.18"
 
 lazy val codacyDuplicationFlay = project
   .in(file("."))
@@ -55,6 +54,9 @@ mappings.in(Universal) ++= resourceDirectory
   .value
 
 scalaVersion in ThisBuild := scalaVersionNumber
-scalaBinaryVersion in ThisBuild := scalaBinaryVersionNumber
 
-scapegoatVersion in ThisBuild := "1.3.5"
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := "4.13.6"
+addCompilerPlugin("org.scalameta" % "semanticdb-scalac" % "4.13.6" cross CrossVersion.full)
+
+enablePlugins(ScalafmtPlugin)
