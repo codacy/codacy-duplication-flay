@@ -12,7 +12,7 @@ object Common {
     packageName in Docker := packageName.value,
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "amazoncorretto:8-alpine3.17-jre",
+    dockerBaseImage := "amazoncorretto:8-alpine3.21-jre",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
@@ -27,7 +27,7 @@ object Common {
             s"""|apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal
                 |   ruby-json ruby-bundler libstdc++ tzdata bash ca-certificates libc-dev
                 |&& echo 'gem: --no-document' > /etc/gemrc
-                |&& gem install rake -v 12.3.3
+                |&& gem install rake -v 13.3.0
                 |&& gem install rdoc
                 |&& cd $defaultDockerInstallationPath/setup && bundle install && gem cleanup
                 |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " "))

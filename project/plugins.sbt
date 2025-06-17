@@ -4,6 +4,8 @@ resolvers += Resolver.jcenterRepo
 libraryDependencies ++= Seq("com.github.pathikrit" %% "better-files" % "3.6.0",
   "com.typesafe.play" %% "play-json" % "2.6.9")
 
+dependencyOverrides += "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
+
 // Static Analysis
 addSbtPlugin("com.sksamuel.scapegoat" %% "sbt-scapegoat" % "1.0.7")
 addSbtPlugin("ch.epfl.scala" % "sbt-scalafix" % "0.5.10")
@@ -16,4 +18,4 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.0")
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.3.11")
 
-addSbtPlugin("com.codacy" % "codacy-sbt-plugin" % "17.1.5")
+addSbtPlugin("com.codacy" % "codacy-sbt-plugin" % "25.2.4")
