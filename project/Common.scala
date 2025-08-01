@@ -12,7 +12,7 @@ object Common {
     packageName in Docker := packageName.value,
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "amazoncorretto:8-alpine3.21-jre",
+    dockerBaseImage := "amazoncorretto:8-alpine3.22-jre",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
