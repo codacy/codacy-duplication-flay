@@ -1,7 +1,7 @@
 import sbt.Keys._
 import sbt._
 
-val scalaVersionNumber = "2.13.16"
+val scalaVersionNumber = "2.12.18"
 
 lazy val codacyDuplicationFlay = project
   .in(file("."))

@@ -17,7 +17,7 @@ addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.9.2")
 
 // Coverage
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.3.1")
-addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "3.1.120")
+addSbtPlugin("com.codacy" % "sbt-codacy-coverage" % "1.3.11")
 
 addSbtPlugin("com.codacy" % "codacy-sbt-plugin" % "25.2.4")
 

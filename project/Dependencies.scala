@@ -6,6 +6,6 @@ object Dependencies {
     val duplicationSeed = "com.codacy" %% "codacy-duplication-scala-seed" % "2.1.3"
   }
 
-  val specs2Version = "5.6.4"
+  val specs2Version = "4.21.0"
   val specs2 = "org.specs2" %% "specs2-core" % specs2Version
 }
