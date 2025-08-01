@@ -82,16 +82,16 @@ object Flay extends DuplicationTool {
         DuplicationCloneFile(filePath, startLine, endLine)
       }
 
-      if (dupCloneFiles.nonEmpty) {
-        val headClone = dupCloneFiles.head
-        val nrTokens = minTokenMatch(options)
-        val nrLines = headClone.endLine - headClone.startLine + 1
-        val cloneLines =
-          clone.files.map(_.contents.mkString(Properties.lineSeparator)).mkString(Properties.lineSeparator)
+      dupCloneFiles.headOption match {
+        case Some(headClone) =>
+          val nrTokens = minTokenMatch(options)
+          val nrLines = headClone.endLine - headClone.startLine + 1
+          val cloneLines =
+            clone.files.map(_.contents.mkString(Properties.lineSeparator)).mkString(Properties.lineSeparator)
 
-        List(DuplicationClone(cloneLines, nrTokens, nrLines, dupCloneFiles))
-      } else {
-        List.empty
+          List(DuplicationClone(cloneLines, nrTokens, nrLines, dupCloneFiles))
+        case None =>
+          List.empty
       }
     }
   }
