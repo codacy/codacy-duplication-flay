@@ -12,7 +12,7 @@ object Common {
     packageName in Docker := packageName.value,
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "amazoncorretto:8-alpine3.21-jre",
+    dockerBaseImage := "amazoncorretto:8-alpine3.22-jre",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
@@ -25,7 +25,7 @@ object Common {
           Cmd("RUN", "mv /opt/codacy/docs /docs"),
           Cmd(
             "RUN",
-            s"""|apk add --no-cache bash ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal ruby-json ruby-bundler 
+            s"""|apk add --no-cache bash ruby ruby-rake ruby-bundler 
                 |    libstdc++ tzdata bash ca-certificates build-base ruby-dev
                 |&& echo 'gem: --no-document' > /etc/gemrc
                 |&& gem install rake -v 13.3.0
