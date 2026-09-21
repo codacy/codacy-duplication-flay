@@ -1,22 +1,18 @@
 #!/usr/bin/env ruby -w
 
 require "optparse"
-require "rubygems"
 require "sexp_processor"
-require "ruby_parser"
+require "path_expander"
 require "timeout"
+require "zlib"
 require "json"
-
-class File
-  RUBY19 = "<3".respond_to? :encoding unless defined? RUBY19 # :nodoc:
-
-  class << self
-    alias :binread :read unless RUBY19
-  end
-end
+require "prism"
+require "prism/translation/ruby_parser"
 
 class Flay
-  VERSION = "2.13.3" # :nodoc:
+  VERSION = "2.14.4" # :nodoc:
+
+  NotRubyParser = Class.new Prism::Translation::RubyParser # compatibility layer :nodoc:
 
   class Item < Struct.new(:structural_hash, :name, :bonus, :mass, :locations)
     alias identical? bonus
@@ -24,6 +20,18 @@ class Flay
 
   class Location < Struct.new(:file, :line, :fuzzy)
     alias fuzzy? fuzzy
+  end
+
+  def self.run args = ARGV
+    extensions = ["rb"] + Flay.load_plugins
+    glob = "**/*.{#{extensions.join ","}}"
+
+    expander = PathExpander.new args, glob
+    files = expander.filter_files expander.process, DEFAULT_IGNORE
+
+    flay = Flay.new Flay.parse_options args
+    flay.process(*files.sort)
+    flay
   end
 
   ##
@@ -39,8 +47,10 @@ class Flay
       :timeout => 10,
       :liberal => false,
       :fuzzy   => false,
-      :only   => nil,
-      :report   => false
+      :only    => nil,
+      :filters => [],
+      :parser  => NotRubyParser,
+      :report  => false,
     }
   end
 
@@ -102,6 +112,11 @@ class Flay
         options[:timeout] = t.to_i
       end
 
+      opts.on("-t", "--legacy", "Use RubyParser to parse.") do
+        require "ruby_parser"
+        options[:parser] = RubyParser
+      end
+
       opts.on("-r", "--report", "Format report as json") do
         options[:report] = true
       end
@@ -126,58 +141,8 @@ class Flay
     options
   end
 
-  ##
-  # Expands +*dirs+ to all files within that match ruby and rake extensions.
-  # --
-  # REFACTOR: from flog
-
-  def self.expand_dirs_to_files *dirs
-    extensions = ["rb"] + Flay.load_plugins
-
-    dirs.flatten.map { |p|
-      if File.directory? p then
-        Dir[File.join(p, "**", "*.{#{extensions.join(",")}}")]
-      else
-        p
-      end
-    }.flatten.map { |s| s.sub(/^\.\//, "") } # strip "./" from paths
-  end
-
   # so I can move this to flog wholesale
   DEFAULT_IGNORE = ".flayignore" # :nodoc:
-
-  ##
-  # A file filter mechanism similar to, but not as extensive as,
-  # .gitignore files:
-  #
-  # + If a pattern does not contain a slash, it is treated as a shell glob.
-  # + If a pattern ends in a slash, it matches on directories (and contents).
-  # + Otherwise, it matches on relative paths.
-  #
-  # File.fnmatch is used throughout, so glob patterns work for all 3 types.
-
-  def self.filter_files files, ignore = DEFAULT_IGNORE
-    ignore_paths = if ignore.respond_to? :read then
-                     ignore.read
-                   elsif File.exist? ignore then
-                     File.read ignore
-                   end
-
-    if ignore_paths then
-      nonglobs, globs = ignore_paths.split("\n").partition { |p| p.include? "/" }
-      dirs, ifiles    = nonglobs.partition { |p| p.end_with? "/" }
-      dirs            = dirs.map { |s| s.chomp "/" }
-
-      only_paths = File::FNM_PATHNAME
-      files = files.reject { |f|
-        dirs.any?     { |i| File.fnmatch?(i, File.dirname(f), only_paths) } ||
-          globs.any?  { |i| File.fnmatch?(i, f) } ||
-          ifiles.any? { |i| File.fnmatch?(i, f, only_paths) }
-      }
-    end
-
-    files
-  end
 
   ##
   # Loads all flay plugins. Files must be named "flay_*.rb".
@@ -200,8 +165,8 @@ class Flay
       end
     end
     @@plugins
-  rescue
-    # ignore
+  rescue => e
+    warn "Error loading plugins: #{e}" if option[:verbose]
   end
 
   # :stopdoc:
@@ -212,8 +177,8 @@ class Flay
   ##
   # Create a new instance of Flay with +option+s.
 
-  def initialize option = nil
-    @option = option || Flay.default_options
+  def initialize option = {}
+    @option = Flay.default_options.merge option
     @hashes = Hash.new { |h,k| h[k] = [] }
 
     self.identical      = {}
@@ -269,10 +234,11 @@ class Flay
     update_masses
 
     sorted = masses.sort_by { |h,m|
+      exp = hashes[h].first
       [-m,
-       hashes[h].first.file,
-       hashes[h].first.line,
-       hashes[h].first.first.to_s]
+       exp.file,
+       exp.line,
+       exp.sexp_type.to_s]
     }
 
     sorted.map { |hash, mass|
@@ -290,7 +256,7 @@ class Flay
         Location[x.file, x.line, extra]
       }
 
-      Item[hash, node.first, bonus, mass, locs]
+      Item[hash, node.sexp_type, bonus, mass, locs]
     }.compact
   end
 
@@ -315,19 +281,33 @@ class Flay
 
   def process_rb file
     begin
-      RubyParser.new.process(File.binread(file), file, option[:timeout])
+      parser = option[:parser].new
+      parser.process(File.binread(file), file, option[:timeout])
     rescue Timeout::Error
       warn "TIMEOUT parsing #{file}. Skipping."
     end
   end
 
   ##
+  # Before processing, filter any sexp's that match against filters
+  # specified in +option[:filters]+. This changes the sexp itself.
+
+  def filter_sexp exp
+    exp.delete_if { |sexp|
+      if Sexp === sexp then
+        del = option[:filters].any? { |pattern| pattern.satisfy? sexp }
+        del or (filter_sexp(sexp); false)
+      end
+    }
+  end
+
+  ##
   # Process a sexp +pt+.
 
   def process_sexp pt
-    pt.deep_each do |node|
-      next unless node.any? { |sub| Sexp === sub }
-      next if node.mass < self.mass_threshold
+    filter_sexp(pt).deep_each do |node|
+      next :skip if node.none? { |sub| Sexp === sub }
+      next :skip if node.mass < self.mass_threshold
 
       self.hashes[node.structural_hash] << node
 
@@ -372,16 +352,19 @@ class Flay
 
   ##
   # Prunes nodes that aren't relevant to analysis or are already
-  # covered by another node.
+  # covered by another node. Also deletes nodes based on the
+  # +:filters+ option.
 
   def prune
     # prune trees that aren't duped at all, or are too small
     self.hashes.delete_if { |_,nodes| nodes.size == 1 }
     self.hashes.delete_if { |_,nodes| nodes.all?(&:modified?) }
 
-    return prune_liberally if option[:liberal]
-
-    prune_conservatively
+    if option[:liberal] then
+      prune_liberally
+    else
+      prune_conservatively
+    end
   end
 
   ##
@@ -478,7 +461,7 @@ class Flay
   end
 
   def collapse_and_label ary # :nodoc:
-    ary[0].zip(*ary[1..-1]).map { |lines|
+    ary.first.zip(*ary.drop(1)).map { |lines|
       if lines.uniq.size == 1 then
         "   #{lines.first}"
       else
@@ -511,7 +494,7 @@ class Flay
 
     if option[:summary]
       summary = []
-      self.summary.sort_by { |_,v| -v }.each do |file, score|
+      self.summary.sort_by { |f,v| [-v, f] }.each do |file, score|
         file_json = {}
         file_json[:score] = "%8.2f" % [score]
         file_json[:filename] = "%s" % [file]
@@ -550,9 +533,7 @@ class Flay
               self.respond_to?(msg) ? self.send(msg, node) : sexp_to_rb(node)
             end
 
-            contents = []
-            contents.push(source)
-            file[:contents] = contents
+            file[:contents] = source.split("\n")
           end
 
           files.push(file)
@@ -573,10 +554,10 @@ class Flay
   def report_io io, data
     io.puts "Total score (lower is better) = #{self.total}"
 
-    if option[:summary]
+    if option[:summary] then
       io.puts
 
-      self.summary.sort_by { |_,v| -v }.each do |file, score|
+      self.summary.sort_by { |f,v| [-v, f] }.each do |file, score|
         io.puts "%8.2f: %s" % [score, file]
       end
 
@@ -590,7 +571,7 @@ class Flay
 
       io.puts
       io.puts "%s%s code found in %p (mass%s = %d)" %
-                  [prefix, match, item.name, item.bonus, item.mass]
+        [prefix, match, item.name, item.bonus, item.mass]
 
       item.locations.each_with_index do |loc, i|
         loc_prefix = "%s: " % (?A.ord + i).chr if option[:diff]
@@ -622,9 +603,9 @@ class Flay
     data = analyze only
 
     if option[:report]
-      report_json(io,data)
+      report_json(io, data)
     else
-      report_io(io,data)
+      report_io(io, data)
     end
   end
 
@@ -655,7 +636,7 @@ class Sexp
   # modify the sexp afterwards and expect it to be correct.
 
   def structural_hash
-    @structural_hash ||= self.structure.hash
+    @structural_hash ||= pure_ruby_hash
   end
 
   ##
@@ -678,14 +659,11 @@ class Sexp
     s
   end
 
+  alias :[] :[] # needed for STRICT_SEXP
+
   def [] a # :nodoc:
-    s = super
-    if Sexp === s then
-      s.file = self.file
-      s.line = self.line
-      s.modified = self.modified
-    end
-    s
+    return super if Integer === a
+    self.new._concat super || []
   end
 
   def + o # :nodoc:
@@ -724,6 +702,37 @@ class Sexp
   def split_code
     index = self.code_index
     self.split_at index if index
+  end
+end
+
+class Sexp # straight from flay-persistent
+  NODE_NAMES = Hash.new { |h,k| h[k] = Zlib.crc32(k.to_s) }
+
+  MAX_INT32 = 2 ** 32 - 1 # :nodoc:
+
+  def pure_ruby_hash # :nodoc: see above
+    hash = 0
+
+    n = NODE_NAMES[sexp_type]
+
+    raise "Bad lookup: #{first} in #{sexp.inspect}" unless n
+
+    hash += n          & MAX_INT32
+    hash += hash << 10 & MAX_INT32
+    hash ^= hash >>  6 & MAX_INT32
+
+    each do |o|
+      next unless Sexp === o
+      hash = hash + o.pure_ruby_hash  & MAX_INT32
+      hash = (hash + (hash << 10)) & MAX_INT32
+      hash = (hash ^ (hash >>  6)) & MAX_INT32
+    end
+
+    hash = (hash + (hash <<  3)) & MAX_INT32
+    hash = (hash ^ (hash >> 11)) & MAX_INT32
+    hash = (hash + (hash << 15)) & MAX_INT32
+
+    hash
   end
 end
 

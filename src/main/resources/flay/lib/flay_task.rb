@@ -45,9 +45,7 @@ class FlayTask < Rake::TaskLib
     desc "Analyze for code duplication in: #{dirs.join(", ")}"
     task name do
       require "flay"
-      flay = Flay.new
-      files = Flay.filter_files Flay.expand_dirs_to_files dirs
-      flay.process(*files)
+      flay = Flay.run(dirs)
       flay.report if verbose
 
       raise "Flay total too high! #{flay.total} > #{threshold}" if
