@@ -1,3 +1,119 @@
+=== 2.14.4 / 2026-04-14
+
+* 2 bug fixes:
+
+  * Fix Sexp#[] to return empty sexp if indicies run off the end. (slbug)
+  * Loosened dependency on ruby2ruby to catch up and drop ruby_parser.
+
+=== 2.14.3 / 2026-03-23
+
+* 2 bug fixes:
+
+  * Fix Sexp#[] to return a Sexp to ensure process_fuzzy can sort sub-sexps.
+  * Make Sexp#[] return a single element if integer is used.
+
+=== 2.14.2 / 2026-01-06
+
+* 1 bug fix:
+
+  * Namespace NotRubyParser to avoid problems with bundler's horrid eager loading. (nateberkopec)
+
+=== 2.14.1 / 2025-12-20
+
+* 3 bug fixes:
+
+  * Bumped dependency to prism to get some upstreamed fixes.
+  * Loosened the minitest dependency to include MT6.
+  * Removed local copy of the upstreamed fixes.
+
+=== 2.14.0 / 2025-12-11
+
+* 2 minor enhancements:
+
+  * Bumped path_expander to 2.0.0.
+  * Switched to prism for ruby parsing. Use --legacy for RubyParser.
+
+=== 2.13.3 / 2024-05-21
+
+* 2 bug fixes:
+
+  * Add secondary sort of score & files on output. (njhammond)
+  * Sort input files to make tracking progress easier.
+
+=== 2.13.2 / 2024-02-05
+
+* 1 bug fix:
+
+  * Pass dirs to Flay.run in FlayTask. (adam12)
+
+=== 2.13.1 / 2023-07-20
+
+* 1 minor enhancement:
+
+  * Brought in action_view erubi hacks to enable block calls w/ <%= forms.
+
+=== 2.13.0 / 2022-04-09
+
+* 1 minor enhancement:
+
+  * Switched from erubis to erubi for erb processing. (clive-devops)
+
+* 1 bug fix:
+
+  * Minor cleanup and top-level error handling changes.
+
+=== 2.12.1 / 2019-10-08
+
+* 1 bug fix:
+
+  * Fixed some sexp access under STRICT_SEXP=1.
+
+=== 2.12.0 / 2018-04-29
+
+* 1 minor enhancement:
+
+  * Switched node filtering to happen before processing to avoid subtrees getting processed. Thanks to codeclimate.com for funding this effort!
+
+=== 2.11.0 / 2018-04-05
+
+* 2 minor enhancements:
+
+  * Added `filters` option to skip processing subtrees that match given patterns.
+  * Switched structural_hash to use crc32 to calculate node type values. Thanks to codeclimate.com!
+
+* 1 bug fix:
+
+  * Merge options w/ defaults. Mostly to fix testing.
+
+=== 2.10.0 / 2017-07-17
+
+* 1 minor enhancement:
+
+  * Added sexp tree filtering via :filters option.
+
+=== 2.9.0 / 2017-04-13
+
+* 1 minor enhancement:
+
+  * Added Sexp#pure_ruby_hash from flay-persistent and switched structural_hash to it. Faster than ruby's #hash and stable.
+
+=== 2.8.1 / 2016-08-24
+
+* 1 bug fix:
+
+  * Accidentally removed require from flay_task.rb. (ajacques)
+
+=== 2.8.0 / 2016-05-16
+
+* 1 minor enhancement:
+
+  * Switched to path_expander to deal with cmdline args. See path_expander for details.
+
+* 2 bug fixes:
+
+  * Added dev deps and bundler plugin to make flavorjones happy. (flavorjones)
+  * Explicitly require rake/tasklib in flay_task.rb. (jasonkarns)
+
 === 2.7.0 / 2016-01-21
 
 * 1 minor enhancement:
@@ -67,7 +183,7 @@ is. In this case, it severely falls short. I'd jump to 4.0 if I could.
   * Added Sexp#+.
   * Added Sexp#code_index to specify where *code starts in some sexps.
   * Added Sexp#has_code?.
-  * Added Sexp#initalize_copy to propagate file/line/modified info.
+  * Added Sexp#initialize_copy to propagate file/line/modified info.
   * Added Sexp#modified, #modified=, and #modified?.
   * Added Sexp#split_at(n). (Something I've wanted in Array for ages).
   * Added Sexp#split_code.

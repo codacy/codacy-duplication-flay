@@ -4,9 +4,9 @@ require "minitest/autorun"
 require "flay"
 require "tmpdir"
 
-$: << "../../sexp_processor/dev/lib"
-
 class TestSexp < Minitest::Test
+  OPTS = Flay.parse_options %w[--mass=1 -v]
+
   def setup
     # a(1) { |c| d }
     @s = s(:iter,
@@ -16,10 +16,7 @@ class TestSexp < Minitest::Test
   end
 
   def test_structural_hash
-    hash = s(:iter,
-             s(:call, s(:arglist, s(:lit))),
-             s(:lasgn),
-             s(:call, s(:arglist))).hash
+    hash = 3381710114
 
     assert_equal hash, @s.deep_clone.structural_hash
     assert_equal hash, @s.structural_hash
@@ -46,13 +43,13 @@ class TestSexp < Minitest::Test
           s(:call, s(:arglist)))
 
     expected = [
-                s[1]      .hash,
-                s[1][1]   .hash,
-                s[1][1][1].hash,
-                s[2]      .hash,
-                s[3]      .hash,
-                s[3][1]   .hash,
-               ].sort
+                s[1],
+                s[1][1],
+                s[1][1][1],
+                s[2],
+                s[3],
+                s[3][1],
+               ].map(&:structural_hash).sort
 
     assert_equal expected, @s.all_structural_subhashes.sort.uniq
 
@@ -65,7 +62,9 @@ class TestSexp < Minitest::Test
     assert_equal expected, x.sort.uniq
   end
 
-  DOG_AND_CAT = Ruby18Parser.new.process <<-RUBY
+  NotRubyParser = Flay::NotRubyParser
+
+  DOG_AND_CAT = NotRubyParser.new.process <<~RUBY
     ##
     # I am a dog.
 
@@ -88,7 +87,7 @@ class TestSexp < Minitest::Test
     end
   RUBY
 
-  ROUND = Ruby18Parser.new.process <<-RUBY
+  ROUND = NotRubyParser.new.process <<~RUBY
     def x(n)
       if n % 2 == 0
         return n
@@ -106,7 +105,7 @@ class TestSexp < Minitest::Test
     flay.process_sexp s(:outer,contained)
     2.times { flay.process_sexp s(:outer,container) }
 
-    exp = eval <<-EOM # just to prevent emacs from reindenting it
+    exp = eval <<~EOM # just to prevent emacs from reindenting it
           [
            [      s(:a, s(:b, s(:c)), s(:d, s(:e))),
                   s(:a, s(:b, s(:c)), s(:d, s(:e))),
@@ -142,7 +141,7 @@ class TestSexp < Minitest::Test
     flay.process_sexp s(:outer,contained)
     2.times { flay.process_sexp s(:outer,container) }
 
-    exp = eval <<-EOM # just to prevent emacs from reindenting it
+    exp = eval <<~EOM # just to prevent emacs from reindenting it
           [
            [      s(:a, s(:b, s(:c)), s(:d, s(:e))),
                   s(:a, s(:b, s(:c)), s(:d, s(:e))),
@@ -196,7 +195,7 @@ class TestSexp < Minitest::Test
 
     flay.process_sexp ROUND.deep_clone
 
-    actual = flay.hashes.values.map { |sexps| sexps.map { |sexp| sexp.first } }
+    actual = flay.hashes.values.map { |sexps| sexps.map(&:sexp_type) }
 
     assert_equal expected, actual.sort_by { |a| a.inspect }
   end
@@ -209,7 +208,7 @@ class TestSexp < Minitest::Test
   end
 
   def test_report
-    flay = Flay.new Flay.parse_options %w[--mass=1 -v]
+    flay = Flay.new OPTS
 
     flay.process_sexp DOG_AND_CAT.deep_clone
     flay.analyze
@@ -218,7 +217,7 @@ class TestSexp < Minitest::Test
       flay.report
     end
 
-    exp = <<-END.gsub(/\d+/, "N").gsub(/^ {6}/, "")
+    exp = <<~END
       Total score (lower is better) = 16
 
       1) Similar code found in :class (mass = 16)
@@ -227,18 +226,105 @@ class TestSexp < Minitest::Test
     END
 
     assert_equal "", err
-    assert_equal exp, out.gsub(/\d+/, "N")
+    assert_equal exp.gsub(/\d+/, "N"), out.gsub(/\d+/, "N")
+  end
+
+  def test_sexp_idx
+    # sexp = NotRubyParser.new.parse "def x(n); n + 1; end"
+    sexp = s(:defn, :x, s(:args, :n),
+             s(:call, s(:lvar, :n), :+, s(:lit, 1)))
+
+    assert_equal :defn, sexp[0]
+    assert_equal s(:defn), sexp[0..0]
+    assert_equal s(:defn, :x), sexp[0..1]
+  end
+
+  def test_sexp_idx__off
+    # sexp = NotRubyParser.new.parse "->(something) { something.to_s }"
+    sexp = s(:iter,
+             s(:lambda),
+             s(:args, :something),
+             s(:call, s(:lvar, :something), :to_s))
+
+    # def arguments_element
+    #   call_element.sexp_body(3) || []
+    call_element = sexp[1] # s(:lambda) = this is just wrong
+
+    assert_equal s(), call_element[3..-1]
+    assert_equal s(), call_element.sexp_body(3)
+  end
+
+  def test__fuzzy__split_at
+    # def x(n); n + 1; end
+    sexp = s(:defn, :x, s(:args, :n), s(:call, s(:lvar, :n), :+, s(:lit, 1)))
+    # sexp = NotRubyParser.new.parse "def x(n); n + 1; end"
+
+    a, b = sexp.split_at 2
+
+    assert_equal s(:defn, :x, s(:args, :n)), a
+    assert_equal s(s(:call, s(:lvar, :n), :+, s(:lit, 1))), b
+  end
+
+  def test__fuzzy__split_code
+    # def x(n); n + 1; end
+    sexp = s(:defn, :x, s(:args, :n), s(:call, s(:lvar, :n), :+, s(:lit, 1)))
+    # sexp = NotRubyParser.new.parse "def x(n); n + 1; end"
+
+    a, b = sexp.split_code
+
+    assert_equal s(:defn, :x, s(:args, :n)), a
+    assert_equal s(s(:call, s(:lvar, :n), :+, s(:lit, 1))), b
+  end
+
+  FUZZY_CODE = NotRubyParser.new.process <<-RUBY
+    def a
+      f1; f2; f3; f4; f5; f6
+    end
+
+    def b
+          f2; f3; f4; f5; f6
+    end
+
+    def c
+          f2; f3; f4; f5; f6; f7
+    end
+  RUBY
+
+  def test_report__fuzzy
+    flay = Flay.new OPTS.merge(fuzzy: 1, mass: 5)
+
+    flay.process_sexp FUZZY_CODE.deep_clone
+
+    out, err = capture_io do
+      flay.report
+    end
+
+    exp = <<~END
+      Total score (lower is better) = 37
+
+      1) Similar code found in :defn (mass = 21)
+        (string):1 (FUZZY)
+        (string):5
+        (string):9 (FUZZY)
+
+      2) Similar code found in :defn (mass = 16)
+        (string):1
+        (string):9
+    END
+
+    assert_equal "", err
+    assert_equal exp.gsub(/\d+/, "N"), out.gsub(/\d+/, "N")
   end
 
   def test_report_io
     out = StringIO.new
-    flay = Flay.new Flay.parse_options %w[--mass=1 -v]
+    flay = Flay.new OPTS
 
     flay.process_sexp DOG_AND_CAT.deep_clone
     flay.analyze
     flay.report out
 
-    exp = <<-END.gsub(/\d+/, "N").gsub(/^ {6}/, "")
+    exp = <<~END
       Total score (lower is better) = 16
 
       1) Similar code found in :class (mass = 16)
@@ -246,11 +332,11 @@ class TestSexp < Minitest::Test
         (string):6
     END
 
-    assert_equal exp, out.string.gsub(/\d+/, "N")
+    assert_equal exp.gsub(/\d+/, "N"), out.string.gsub(/\d+/, "N")
   end
 
   def test_report_diff
-    flay = Flay.new Flay.parse_options %w[-d --mass=1 -v]
+    flay = Flay.new OPTS.merge(:diff => true)
 
     flay.process_sexp DOG_AND_CAT.deep_clone
     flay.analyze
@@ -259,7 +345,7 @@ class TestSexp < Minitest::Test
       flay.report
     end
 
-    exp = <<-END.gsub(/\d+/, "N").gsub(/^ {6}/, "")
+    exp = <<~END.gsub(/_NL_/, "")
       Total score (lower is better) = 16
 
       1) Similar code found in :class (mass = 16)
@@ -272,7 +358,7 @@ class TestSexp < Minitest::Test
       B: # am
       B: # a
       B: # cat.
-
+         _NL_
       A: class Dog
       B: class Cat
       A:   def x
@@ -283,11 +369,11 @@ class TestSexp < Minitest::Test
     END
 
     assert_equal "", err
-    assert_equal exp, out.gsub(/\d+/, "N").gsub(/^ {3}$/, "")
+    assert_equal exp.gsub(/\d+/, "N"), out.gsub(/\d+/, "N")
   end
 
   def test_report_diff_plugin_converter
-    flay = Flay.new Flay.parse_options %w[-d --mass=1 -v]
+    flay = Flay.new OPTS.merge(:diff => true)
 
     flay.process_sexp DOG_AND_CAT.deep_clone
     flay.analyze
@@ -301,7 +387,7 @@ class TestSexp < Minitest::Test
 
     Flay.send(:remove_method, :sexp_to_)
 
-    exp = <<-END.gsub(/\d+/, "N").gsub(/^ {6}/, "")
+    exp = <<~END
       Total score (lower is better) = 16
 
       1) Similar code found in :class (mass = 16)
@@ -313,7 +399,7 @@ class TestSexp < Minitest::Test
     END
 
     assert_equal "", err
-    assert_equal exp, out.gsub(/\d+/, "N").gsub(/^ {3}$/, "")
+    assert_equal exp.gsub(/\d+/, "N"), out.gsub(/\d+/, "N")
   end
 
   def test_n_way_diff
@@ -322,7 +408,7 @@ class TestSexp < Minitest::Test
 
     flay = Flay.new
 
-    exp = <<-EOM.gsub(/\d+/, "N").gsub(/^ {6}/, "").chomp
+    exp = <<~EOM.chomp
          ##
       A: # I am a dog.
       B: # I
@@ -349,7 +435,7 @@ class TestSexp < Minitest::Test
 
     flay = Flay.new
 
-    exp = <<-EOM.gsub(/\d+/, "N").gsub(/^ {6}/, "").chomp
+    exp = <<~EOM.gsub(/\d+/, "N").chomp
       A: class Dog
       B: class Cat
       A:   def x
@@ -359,7 +445,7 @@ class TestSexp < Minitest::Test
          end
     EOM
 
-    assert_equal exp, flay.n_way_diff(*dog_and_cat).gsub(/^ {3}$/, "")
+    assert_equal exp, flay.n_way_diff(*dog_and_cat)
   end
 
   def test_split_and_group
@@ -393,10 +479,12 @@ class TestSexp < Minitest::Test
   def test_collapse_and_label
     flay = Flay.new
 
-    a = %w(a b c).map { |s| s.group = "A"; s }
-    b = %w(d b f).map { |s| s.group = "B"; s }
+    a = %w(a b c).map(&:dup).map { |s| s.group = "A"; s }
+    b = %w(d b f).map(&:dup).map { |s| s.group = "B"; s }
 
-    exp = [["A: a", "B: d"], "   b", ["A: c", "B: f"]]
+    exp = [["A: a", "B: d"],
+           "   b",
+           ["A: c", "B: f"]]
 
     assert_equal exp, flay.collapse_and_label([a, b])
   end
@@ -404,8 +492,8 @@ class TestSexp < Minitest::Test
   def test_collapse_and_label_same
     flay = Flay.new
 
-    a = %w(a b c).map { |s| s.group = "A"; s }
-    b = %w(a b c).map { |s| s.group = "B"; s }
+    a = %w(a b c).map(&:dup).map { |s| s.group = "A"; s }
+    b = %w(a b c).map(&:dup).map { |s| s.group = "B"; s }
 
     exp = ["   a", "   b", "   c"]
 
@@ -416,10 +504,9 @@ class TestSexp < Minitest::Test
     dog_and_cat = ["##\n# I am a dog.\n\ndef x\n  return \"Hello\"\nend",
                    "##\n# I\n#\n# am\n# a\n# cat.\n\ndef y\n  return \"Hello\"\nend"]
 
-    opts = Flay.parse_options
-    flay = Flay.new opts
+    flay = Flay.new Flay.default_options
 
-    exp = <<-EOM.gsub(/\d+/, "N").gsub(/^ {6}/, "").chomp
+    exp = <<~EOM.gsub(/\d+/, "N").gsub(/_NL_/, "").chomp
          ##
       A: # I am a dog.
       B: # I
@@ -427,61 +514,184 @@ class TestSexp < Minitest::Test
       B: # am
       B: # a
       B: # cat.
-
+         _NL_
       A: def x
       B: def y
            return \"Hello\"
          end
     EOM
 
-    assert_equal exp, flay.n_way_diff(*dog_and_cat).gsub(/^ {3}$/, "")
+    assert_equal exp, flay.n_way_diff(*dog_and_cat)
   end
 
-  def test_cls_expand_dirs_to_files
-    Dir.mktmpdir do |dir|
-      Dir.chdir dir do
-        FileUtils.touch "dog_and_cat.rb"
+  attr_accessor :flay
 
-        files = Flay.expand_dirs_to_files "."
-        assert_equal %w[dog_and_cat.rb], files
-      end
-    end
+  def refute_nodes type
+    assert flay.hashes.values.flatten(1).none? { |s| s.sexp_type == type }, "Found #{type} nodes!"
   end
 
-  def assert_filter_files exp, filter, files = %w[test/dog_and_cat.rb]
-    ignore = StringIO.new filter
-    act = Flay.filter_files files, ignore
-    assert_equal exp, act
+  def assert_nodes type
+    assert flay.hashes.values.flatten(1).any? { |s| s.sexp_type == type }, "Did not find #{type} nodes!"
   end
 
-  def test_cls_filter_files_dir
-    assert_filter_files [], "test/"
+  def test_prune_and_filter_conflict_separate_trees
+    exp_foo = s(:begin,
+                s(:begin,
+                  s(:filter_me,
+                    s(:a, s(:b, s(:c, s(:d)))))))
+
+    exp_bar = s(:begin,
+                s(:begin,
+                  s(:filter_me,
+                    s(:a, s(:b, s(:c, s(:d)))))))
+
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp exp_foo
+    flay.process_sexp exp_bar
+
+    refute_nodes :filter_me
+
+    assert_empty flay.hashes
   end
 
-  def test_cls_filter_files_files
-    assert_filter_files [], "test/*.rb"
+  def test_prune_and_filter_conflict_different_tree_shapes
+    exp_foo = s(:filter_me,
+                s(:a, s(:b)))
 
-    example = %w[test/file.rb test/sub/file.rb top/test/perf.rb]
+    exp_bar = s(:filter_me,
+                s(:a, s(:b)),
+                s(:c))
 
-    assert_filter_files example[1..-1], "test/*.rb", example
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp s(:begin,
+                        s(:begin,
+                          exp_foo,
+                          exp_bar))
+
+    refute_nodes :filter_me
+
+    flay.prune
+
+    assert_empty flay.hashes
   end
 
-  def test_cls_filter_files_glob
-    assert_filter_files [], "test*"
-    assert_filter_files [], "test*", ["test/lib/woot.rb"]
-    assert_filter_files [], "*.rb"
-    assert_filter_files [], "*dog*.rb"
+  def test_prune_and_filter_conflict_different_literals
+    exp_foo = s(:filter_me,
+                s(:a, s(:b, 1)))
+
+    exp_bar = s(:filter_me,
+                s(:a, s(:b, 2)))
+
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp s(:begin,
+                        s(:begin,
+                          exp_foo,
+                          exp_bar))
+
+    refute_nodes :filter_me
+
+    flay.prune
+
+    assert_empty flay.hashes
   end
 
-  def test_cls_filter_files_glob_miss
-    miss = %w[test/dog_and_cat.rb]
-    assert_filter_files miss, "test"
-    assert_filter_files miss, "nope"
+  def test_prune_and_filter_conflict_shape_and_literals
+    exp_foo = s(:filter_me,
+                s(:a, s(:b, 1)))
+
+    exp_bar = s(:filter_me,
+                s(:a, s(:b, 2)),
+                s(:c))
+
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp s(:begin,
+                        s(:begin,
+                          exp_foo,
+                          exp_bar))
+
+    refute_nodes :filter_me
+
+    flay.prune
+
+    assert_empty flay.hashes
   end
 
-  def test_expand_dirs_on_frozen_string
-    s = "./foo"
-    s.freeze
-    assert_equal Flay.expand_dirs_to_files([s]), ["foo"]
+  def test_prune_and_filter_conflict_must_keep_nonfiltered_trees
+    exp_foo = s(:filter_me,
+                s(:a, s(:b, 1)))
+
+    exp_bar = s(:filter_me,
+                s(:a, s(:b, 2)))
+
+    exp_baz = s(:begin,
+                s(:keep,
+                  s(:a, s(:b, 1))),
+                s(:keep,
+                  s(:a, s(:b, 2))))
+
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp s(:begin,
+                        s(:begin,
+                          exp_baz,
+                          exp_foo,
+                          exp_bar))
+
+    refute_nodes :filter_me
+    assert_nodes :keep
+
+    flay.prune
+
+    refute_empty flay.hashes
+    refute_nodes :filter_me
+    assert_nodes :keep
   end
+
+  def test_prune_and_filter_conflict_must_keep_nonfiltered_trees2
+    exp_foo = s(:filter_me,
+                s(:a, s(:b, 1)))
+
+    exp_bar = s(:filter_me,
+                s(:a, s(:b, 2)))
+
+    exp_baz = s(:begin,
+                s(:keep,
+                  s(:a, s(:b, 1))),
+                s(:keep,
+                  s(:a, s(:b, 2))))
+
+    filter = Sexp::Matcher.parse("(filter_me ___)")
+    options = Flay.default_options.merge(mass: 0, filters: [filter])
+    self.flay = Flay.new(options)
+
+    flay.process_sexp s(:begin,
+                        s(:begin,
+                          exp_foo,
+                          exp_bar,
+                          exp_baz))
+
+    refute_nodes :filter_me
+    assert_nodes :keep
+
+    flay.prune
+
+    refute_empty flay.hashes
+    refute_nodes :filter_me
+    assert_nodes :keep
+  end
+
 end

@@ -44,10 +44,10 @@ mappings.in(Universal) ++= resourceDirectory
       (file("src/main/resources/flay/lib/flay_task.rb"), "/flay/lib/flay_task.rb"),
       (file("src/main/resources/flay/lib/gauntlet_flay.rb"), "/flay/lib/gauntlet_flay.rb"),
       (file("src/main/resources/flay/test/test_flay.rb"), "/flay/test/test_flay.rb"),
-      (file("src/main/resources/flay/History.txt"), "/flay/History.txt"),
+      (file("src/main/resources/flay/History.rdoc"), "/flay/History.rdoc"),
       (file("src/main/resources/flay/Manifest.txt"), "/flay/Manifest.txt"),
       (file("src/main/resources/flay/Rakefile"), "/flay/Rakefile"),
-      (file("src/main/resources/flay/README.txt"), "/flay/README.txt"))
+      (file("src/main/resources/flay/README.rdoc"), "/flay/README.rdoc"))
 
     docFiles ++ rubyFiles
   }

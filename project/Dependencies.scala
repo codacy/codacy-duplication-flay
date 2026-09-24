@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
 
   object Codacy {
-    val duplicationSeed = "com.codacy" %% "codacy-duplication-scala-seed" % "2.1.3"
+    val duplicationSeed = "com.codacy" %% "codacy-duplication-scala-seed" % "2.1.4"
   }
 
   val specs2Version = "4.21.0"

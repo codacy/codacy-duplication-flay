@@ -23,7 +23,7 @@ class FlaySpec extends Specification {
                            |self.respond_to?(msg) ? (self.send(msg, s)) : (sexp_to_rb(s))""".stripMargin,
           1,
           2,
-          List(DuplicationCloneFile("flay.rb", 549, 550), DuplicationCloneFile("flay.rb", 607, 608))),
+          List(DuplicationCloneFile("flay.rb", 532, 533), DuplicationCloneFile("flay.rb", 588, 589))),
         DuplicationClone(
           """opts.on("-m", "--mass MASS", Integer, "Sets mass threshold (default = #{options[:mass]})") do |m|
             |  options[:mass] = m.to_i
@@ -33,25 +33,7 @@ class FlaySpec extends Specification {
             |end""".stripMargin,
           1,
           3,
-          List(DuplicationCloneFile("flay.rb", 76, 78), DuplicationCloneFile("flay.rb", 101, 103))),
-        DuplicationClone(
-          """def add_expr_literal(src, code)
-                           |  if code.=~(BLOCK_EXPR) then
-                           |    ((src << "@output_buffer.append= ") << code)
-                           |  else
-                           |    (((src << "@output_buffer.append=(") << code) << ");")
-                           |  end
-                           |end
-                           |def add_expr_escaped(src, code)
-                           |  if code.=~(BLOCK_EXPR) then
-                           |    ((src << "@output_buffer.safe_append= ") << code)
-                           |  else
-                           |    (((src << "@output_buffer.safe_append=(") << code) << ");")
-                           |  end
-                           |end""".stripMargin,
-          1,
-          7,
-          List(DuplicationCloneFile("flay_erb.rb", 28, 34), DuplicationCloneFile("flay_erb.rb", 36, 42))))
+          List(DuplicationCloneFile("flay.rb", 85, 87), DuplicationCloneFile("flay.rb", 110, 112))))
         .sortBy(_.cloneLines)
 
       val clonesTry = Flay(Source.Directory(dir), None, Map.empty)
