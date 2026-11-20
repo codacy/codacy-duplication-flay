@@ -25,7 +25,7 @@ object Common {
           Cmd("RUN", "mv /opt/codacy/docs /docs"),
           Cmd(
             "RUN",
-                s"""|apk add --no-cache bash openjdk17-jre-headless libstdc++ tzdata ca-certificates build-base
+            s"""|apk add --no-cache bash openjdk17-jre-headless libstdc++ tzdata ca-certificates build-base
                 |&& echo 'gem: --no-document' > /etc/gemrc
                 |&& gem install rake -v 13.3.0
                 |&& gem install rdoc
