@@ -12,7 +12,7 @@ object Common {
     packageName in Docker := packageName.value,
     version in Docker := version.value,
     maintainer in Docker := "Codacy <team@codacy.com>",
-    dockerBaseImage := "amazoncorretto:8-alpine3.22-jre",
+    dockerBaseImage := "ruby:4.0.10-alpine3.24",
     dockerUpdateLatest := true,
     defaultLinuxInstallLocation in Docker := defaultDockerInstallationPath,
     daemonUser in Docker := "docker",
@@ -25,17 +25,19 @@ object Common {
           Cmd("RUN", "mv /opt/codacy/docs /docs"),
           Cmd(
             "RUN",
-            s"""|apk add --no-cache bash ruby ruby-rake ruby-bundler 
-                |    libstdc++ tzdata bash ca-certificates build-base ruby-dev
+                        s"""|apk add --no-cache bash openjdk17-jre-headless libstdc++ tzdata ca-certificates build-base
                 |&& echo 'gem: --no-document' > /etc/gemrc
                 |&& gem install rake -v 13.3.0
                 |&& gem install rdoc
                 |&& cd $defaultDockerInstallationPath/setup && bundle install && gem cleanup
+                |&& apk del build-base
                 |&& rm -rf /tmp/* /var/cache/apk/*""".stripMargin.replaceAll(System.lineSeparator(), " ")))
 
       case cmd @ Cmd("WORKDIR", _) =>
         List(
           Cmd("RUN", "adduser -u 2004 -D docker"),
+          Cmd("ENV", "JAVA_HOME /usr/lib/jvm/java-17-openjdk"),
+          Cmd("ENV", "PATH $JAVA_HOME/bin:$PATH"),
           Cmd("ENV", s"FLAY_SOURCE_PATH $defaultDockerInstallationPath/flay"),
           cmd)
 
